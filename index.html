@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<script src="https://d3js.org/d3.v3.min.js"></script>
+<script src="./lib/d3.layout.cloud.js"></script>
+<script src="./js/index.js"></script>
+
+<head>
+    <title>Word Cloud Example</title>
+</head>
+<style>
+    body {
+        font-family:"Lucida Grande","Droid Sans",Arial,Helvetica,sans-serif;
+    }
+    .legend {
+        border: 1px solid #555555;
+        border-radius: 5px 5px 5px 5px;
+        font-size: 0.8em;
+        margin: 10px;
+        padding: 8px;
+    }
+    .bld {
+        font-weight: bold;
+    }
+    #cloud_container {
+        display: flex;
+        justify-content: center;
+    }
+</style>
+<body>
+    <div id="cloud_container"></div>
+</body>
+<script>
+    var color = d3.scale.linear()
+                .domain([0,1,2,3,4,5,6,10,15,20,100])
+                .range(["#dcd", "#ccc", "#bdb", "#ada", "#959", "#838", "#727", "#666", "#655", "#443", "#133", "#629"]);
+                //.range(["#300", '#900', '#ff0000'])
+
+    text_elaboration(4)
+    .then(function(frequency_list) {
+    frequency_list = frequency_list.sort(compare).slice(0, 100)
+    d3.layout.cloud().size([800, 800])
+            .font('Impact')
+            .padding(5)
+            .words(frequency_list)
+            .rotate(0)
+            .text(function(d) { return d.text; })
+            .fontSize(function(d) { return d.size*5; })
+            .on("end", draw)
+            .start();
+
+    })
+    
+
+
+    function compare(a, b) {
+        // Use toUpperCase() to ignore character casing
+        const A = a.size;
+        const B = b.size;
+
+        let comparison = 0;
+        if (A > B) {
+            comparison = -1;
+        } else if (A < B) {
+            comparison = 1;
+        }
+        return comparison;
+    }
+
+    function draw(words) {
+    d3.select("#cloud_container").append("svg")
+            .attr("width", 850)
+            .attr("height", 850)
+            .attr("class", "wordcloud")
+            .attr("text-anchor", "middle")
+            .attr('font-family', 'Impact')
+            .attr('id', 'cloud')
+            .append("g")
+            // without the transform, words words would get cutoff to the left and top, they would
+            // appear outside of the SVG area
+            .attr("transform", "translate(400,400)")
+            .selectAll("text")
+            .data(words)
+            .enter().append("text")
+            .style("font-size", function(d) { return d.size + "px"; })
+            .style("fill", function(d, i) { return color(i); })
+            .attr("transform", function(d) {
+                return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+            })
+            .text(function(d) { return d.text; });
+    }
+</script>
+
+</html>
