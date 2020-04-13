@@ -37,6 +37,7 @@
 
     text_elaboration(4)
     .then(function(frequency_list) {
+    //TODO: the sorting might not work, add the print of the dictionary
     frequency_list = frequency_list.sort(compare).slice(0, 100)
     d3.layout.cloud().size([800, 800])
             .font('Impact')
